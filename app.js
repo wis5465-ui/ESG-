@@ -243,6 +243,7 @@ async function identifyPlant(blob) {
     const data = await res.json();
     heightValue.textContent = data.height || '측정 불가';
   } catch (e) {
+    console.error('identifyPlant error:', e);
     heightValue.textContent = '측정 실패';
   }
 }
