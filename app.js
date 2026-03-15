@@ -241,6 +241,12 @@ async function identifyPlant(blob) {
       body: JSON.stringify({ imageBase64: base64 })
     });
     const data = await res.json();
+    console.log('API 응답:', JSON.stringify(data));
+    if (!res.ok) {
+      console.error('API 에러 상세:', data);
+      heightValue.textContent = '측정 실패';
+      return;
+    }
     heightValue.textContent = data.height || '측정 불가';
   } catch (e) {
     console.error('identifyPlant error:', e);
