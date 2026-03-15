@@ -1,0 +1,718 @@
+/* ===== Apple-style Plant Management App ===== */
+
+:root {
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+
+  --bg: #f2f7f2;
+  --card-bg: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border: rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'SF Pro Display', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== View Transitions ===== */
+.view {
+  display: none;
+  min-height: 100vh;
+  animation: fadeSlideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.view.active {
+  display: block;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+.view-inner {
+  padding: 0 20px 40px;
+  padding-top: env(safe-area-inset-top, 20px);
+}
+
+/* ===== Title ===== */
+.title-display {
+  padding: 60px 0 8px;
+}
+
+.title-display h1 {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* ===== Section ===== */
+.section-label {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 28px 0 14px;
+  color: var(--text-primary);
+}
+
+/* ===== Plants Scroll Container ===== */
+.plants-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 0 16px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.plants-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== Plant Card ===== */
+.plant-card {
+  flex: 0 0 140px;
+  height: 180px;
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  scroll-snap-align: start;
+  position: relative;
+  overflow: hidden;
+}
+
+.plant-card:active {
+  transform: scale(0.96);
+  box-shadow: var(--shadow-md);
+}
+
+.plant-card.add-card {
+  border: 2px dashed var(--green-300);
+  background: var(--green-50);
+  box-shadow: none;
+}
+
+.plant-card.add-card .add-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--green-100);
+  color: var(--green-600);
+  font-size: 28px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.plant-card.add-card:active .add-icon {
+  background: var(--green-200);
+}
+
+.plant-card.add-card span {
+  font-size: 13px;
+  color: var(--green-700);
+  font-weight: 500;
+}
+
+/* Existing plant card */
+.plant-card.existing {
+  background: var(--card-bg);
+}
+
+.plant-card.existing .plant-thumb {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.plant-card.existing .plant-info {
+  padding: 10px 12px;
+  width: 100%;
+  text-align: left;
+}
+
+.plant-card.existing .plant-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plant-card.existing .plant-date {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+  display: block;
+}
+
+/* ===== Education Button ===== */
+.edu-button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--green-600), var(--green-700));
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0;
+  cursor: pointer;
+  margin-top: 24px;
+  box-shadow: var(--shadow-md), 0 0 0 0 rgba(22, 163, 74, 0.3);
+  transition: all 0.2s ease;
+}
+
+.edu-button:active {
+  transform: scale(0.98);
+}
+
+.edu-button-inner {
+  display: flex;
+  align-items: center;
+  padding: 18px 20px;
+  gap: 14px;
+}
+
+.edu-icon {
+  font-size: 28px;
+}
+
+.edu-text {
+  flex: 1;
+  text-align: left;
+}
+
+.edu-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.edu-desc {
+  display: block;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
+}
+
+.edu-arrow {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 300;
+}
+
+/* ===== Nav Bar ===== */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 56px 0 16px;
+}
+
+.nav-bar h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 17px;
+  color: var(--green-600);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 8px 4px;
+  min-width: 60px;
+  text-align: left;
+}
+
+/* ===== Register Form ===== */
+.register-form {
+  padding-top: 8px;
+}
+
+.input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.text-field {
+  width: 100%;
+  padding: 16px 18px;
+  font-size: 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.text-field:focus {
+  outline: none;
+  border-color: var(--green-400);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+}
+
+.text-field::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ===== Camera ===== */
+.camera-section {
+  margin-top: 24px;
+}
+
+.camera-display {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #000;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.camera-display video,
+.camera-display img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--green-800), var(--green-900));
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.camera-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.camera-placeholder p {
+  font-size: 14px;
+  text-align: center;
+  padding: 0 40px;
+  line-height: 1.5;
+}
+
+/* ===== Capture Button ===== */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.capture-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: transform 0.15s ease;
+}
+
+.capture-button:active {
+  transform: scale(0.9);
+}
+
+.capture-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid var(--green-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.capture-inner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--green-500);
+  transition: all 0.15s ease;
+}
+
+.capture-button:active .capture-inner {
+  background: var(--green-600);
+  width: 52px;
+  height: 52px;
+}
+
+.capture-hint {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 10px;
+}
+
+/* ===== Save Button ===== */
+.save-button {
+  width: 100%;
+  padding: 17px;
+  font-size: 17px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--green-500), var(--green-600));
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-top: 24px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+}
+
+.save-button:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, var(--green-600), var(--green-700));
+}
+
+/* ===== Record View ===== */
+.record-content {
+  padding-top: 8px;
+}
+
+.growth-summary {
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+
+.growth-summary h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.growth-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green-500);
+  margin-top: 5px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.timeline-item:not(:last-child) .timeline-dot::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 4px;
+  width: 2px;
+  height: 30px;
+  background: var(--green-200);
+}
+
+.timeline-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.timeline-info {
+  flex: 1;
+}
+
+.timeline-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.timeline-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+/* ===== Graph ===== */
+.graph-section {
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+
+.graph-section h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.graph-section canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* ===== Carbon Section ===== */
+.carbon-section {
+  margin-bottom: 20px;
+}
+
+.carbon-result {
+  background: linear-gradient(135deg, var(--green-600), var(--green-800));
+  border-radius: var(--radius-md);
+  padding: 28px 20px;
+  text-align: center;
+  color: white;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 14px;
+}
+
+.carbon-number {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.carbon-unit {
+  font-size: 15px;
+  opacity: 0.8;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.carbon-analogy {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.analogy-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 18px 16px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.analogy-icon {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.analogy-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ===== Popup (Bottom Sheet) ===== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 100;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.popup-overlay.active {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.popup-sheet {
+  width: 100%;
+  max-width: 430px;
+  background: var(--card-bg);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: 12px 24px 40px;
+  animation: sheetUp 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.popup-handle {
+  width: 36px;
+  height: 5px;
+  background: var(--text-tertiary);
+  border-radius: 3px;
+  margin: 0 auto 20px;
+  opacity: 0.3;
+}
+
+.popup-sheet h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.popup-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--green-50);
+  border: 1px solid var(--green-100);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.popup-option:active {
+  background: var(--green-100);
+  transform: scale(0.98);
+}
+
+.popup-option-icon {
+  font-size: 28px;
+}
+
+.popup-option div {
+  flex: 1;
+}
+
+.popup-option-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.popup-option-desc {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.popup-arrow {
+  font-size: 22px;
+  color: var(--text-tertiary);
+}
+
+/* ===== Utility ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a1a0f;
+    --card-bg: #1a2e1f;
+    --text-primary: #f0fdf4;
+    --text-secondary: #9ca3af;
+    --text-tertiary: #6b7280;
+    --border: rgba(255, 255, 255, 0.08);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.4);
+  }
+
+  .plant-card.add-card {
+    border-color: var(--green-800);
+    background: rgba(20, 83, 45, 0.3);
+  }
+
+  .popup-option {
+    background: rgba(20, 83, 45, 0.3);
+    border-color: rgba(20, 83, 45, 0.5);
+  }
+}

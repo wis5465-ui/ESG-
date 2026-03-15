@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>내 식물 관리</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- 뷰 1: 내 식물 관리 (메인) -->
+<div id="view-main" class="view active">
+  <div class="view-inner">
+    <div class="title-display">
+      <h1>내 식물 관리</h1>
+      <p class="subtitle">나의 작은 정원을 가꿔보세요</p>
+    </div>
+
+    <div class="my-plants-section">
+      <h2 class="section-label">내 식물들</h2>
+      <div id="plants-container" class="plants-scroll">
+        <!-- 식물 카드들이 여기에 추가됨 -->
+        <button id="add-plant-btn" class="plant-card add-card" onclick="handleAddPlant()">
+          <div class="add-icon">+</div>
+          <span>식물 추가</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="edu-button" onclick="alert('교육 콘텐츠 페이지로 이동합니다.')">
+      <div class="edu-button-inner">
+        <span class="edu-icon">📚</span>
+        <div class="edu-text">
+          <span class="edu-title">교육 들으러 가기</span>
+          <span class="edu-desc">식물 관리 팁을 배워보세요</span>
+        </div>
+        <span class="edu-arrow">›</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+<!-- 뷰 3: 기록 첫 단계 (신규 등록) -->
+<div id="view-register" class="view">
+  <div class="view-inner">
+    <div class="nav-bar">
+      <button class="back-btn" onclick="goBack()">‹ 뒤로</button>
+      <h2>새 식물 등록</h2>
+      <div style="width:60px"></div>
+    </div>
+
+    <div class="register-form">
+      <label class="input-label">식물 이름</label>
+      <input type="text" id="plant-name-input" class="text-field" placeholder="예: 몬스테라, 스투키">
+
+      <div class="camera-section">
+        <div id="camera-display" class="camera-display">
+          <video id="camera-video" autoplay playsinline></video>
+          <canvas id="camera-canvas" style="display:none"></canvas>
+          <img id="captured-image" style="display:none">
+          <div id="camera-placeholder" class="camera-placeholder">
+            <span class="camera-icon">📷</span>
+            <p>카메라를 시작하려면 아래 버튼을 눌러주세요</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button id="capture-btn" class="capture-button" onclick="handleCapture()">
+          <div class="capture-ring">
+            <div class="capture-inner"></div>
+          </div>
+        </button>
+        <p class="capture-hint" id="capture-hint">촬영 버튼을 눌러 식물을 촬영하세요</p>
+      </div>
+
+      <button id="save-btn" class="save-button" style="display:none" onclick="savePlant()">
+        등록 완료
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 뷰 4: 기록 변화 보기 -->
+<div id="view-record" class="view">
+  <div class="view-inner">
+    <div class="nav-bar">
+      <button class="back-btn" onclick="goBack()">‹ 뒤로</button>
+      <h2 id="record-title">성장 기록</h2>
+      <div style="width:60px"></div>
+    </div>
+
+    <div class="record-content">
+      <div class="growth-summary">
+        <h3>성장 기록 결과 (누적)</h3>
+        <div id="growth-timeline" class="growth-timeline">
+          <!-- 타임라인 아이템 동적 생성 -->
+        </div>
+      </div>
+
+      <div class="graph-section">
+        <h3>변화 그래프</h3>
+        <canvas id="growth-chart" width="340" height="200"></canvas>
+      </div>
+
+      <div class="carbon-section">
+        <div class="carbon-result">
+          <div class="carbon-number" id="carbon-value">0.0</div>
+          <div class="carbon-unit">kg CO₂ 감축</div>
+        </div>
+
+        <div class="carbon-analogy">
+          <div class="analogy-card">
+            <span class="analogy-icon">🚗</span>
+            <p id="analogy-car">자동차 0km 주행과 같아요</p>
+          </div>
+          <div class="analogy-card">
+            <span class="analogy-icon">🌳</span>
+            <p id="analogy-tree">나무 0그루를 심은 효과예요</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 팝업: 기존 식물 옵션 -->
+<div id="popup-overlay" class="popup-overlay" onclick="closePopup()">
+  <div class="popup-sheet" onclick="event.stopPropagation()">
+    <div class="popup-handle"></div>
+    <h3 id="popup-plant-name">식물 이름</h3>
+    <button class="popup-option" onclick="viewRecord()">
+      <span class="popup-option-icon">📊</span>
+      <div>
+        <span class="popup-option-title">기록 보기</span>
+        <span class="popup-option-desc">성장 기록과 탄소 감축 효과를 확인합니다</span>
+      </div>
+      <span class="popup-arrow">›</span>
+    </button>
+    <button class="popup-option" onclick="addRecord()">
+      <span class="popup-option-icon">📸</span>
+      <div>
+        <span class="popup-option-title">기록하기</span>
+        <span class="popup-option-desc">새로운 성장 사진을 촬영합니다</span>
+      </div>
+      <span class="popup-arrow">›</span>
+    </button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
