@@ -7,7 +7,7 @@ let isRecording = false;
 
 // ===== Supabase 헬퍼 =====
 async function fetchPlants() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('plants')
     .select('*, records(*)')
     .order('created_at', { ascending: false });
@@ -19,11 +19,11 @@ async function fetchPlants() {
 
 async function uploadPhoto(blob) {
   const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from('plant-photos')
     .upload(fileName, blob, { contentType: 'image/jpeg' });
   if (error) { console.error(error); return null; }
-  const { data: urlData } = supabase.storage.from('plant-photos').getPublicUrl(fileName);
+  const { data: urlData } = supabaseClient.storage.from('plant-photos').getPublicUrl(fileName);
   return urlData.publicUrl;
 }
 
@@ -268,20 +268,20 @@ async function savePlant() {
 
   if (isRecording && currentPlantId) {
     // 기존 식물에 기록 추가
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('records')
       .insert({ plant_id: currentPlantId, photo_url: photoUrl });
     if (error) { console.error(error); alert('저장 실패'); saveBtn.disabled = false; return; }
   } else {
     // 신규 식물 등록
-    const { data: newPlant, error: plantErr } = await supabase
+    const { data: newPlant, error: plantErr } = await supabaseClient
       .from('plants')
       .insert({ name })
       .select()
       .single();
     if (plantErr) { console.error(plantErr); alert('저장 실패'); saveBtn.disabled = false; return; }
 
-    const { error: recErr } = await supabase
+    const { error: recErr } = await supabaseClient
       .from('records')
       .insert({ plant_id: newPlant.id, photo_url: photoUrl });
     if (recErr) console.error(recErr);
@@ -337,7 +337,7 @@ document.head.appendChild(shakeStyle);
 
 // ===== 기록 보기 뷰 =====
 async function showRecordView(plantId) {
-  const { data: plant, error } = await supabase
+  const { data: plant, error } = await supabaseClient
     .from('plants')
     .select('*, records(*)')
     .eq('id', plantId)
