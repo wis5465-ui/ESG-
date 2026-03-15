@@ -216,6 +216,20 @@ function showCapturedImage(src) {
   document.getElementById('save-btn').textContent = isRecording ? '기록 추가' : '등록 완료';
 }
 
+// ===== 파일 업로드 =====
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  capturedBlob = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    showCapturedImage(ev.target.result);
+    if (!isRecording) identifyPlant(file);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
 // ===== AI 식물 인식 =====
 function blobToBase64(blob) {
   return new Promise((resolve) => {

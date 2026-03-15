@@ -84,6 +84,11 @@
         <p class="capture-hint" id="capture-hint">촬영 버튼을 눌러 식물을 촬영하세요</p>
       </div>
 
+      <input type="file" id="file-upload-input" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
+      <button class="upload-button" onclick="document.getElementById('file-upload-input').click()">
+        🖼️ 사진첩 / 파일에서 선택
+      </button>
+
       <button id="save-btn" class="save-button" style="display:none" onclick="savePlant()">
         등록 완료
       </button>
