@@ -199,6 +199,7 @@ function handleCapture() {
   canvas.toBlob((blob) => {
     capturedBlob = blob;
     showCapturedImage(URL.createObjectURL(blob));
+    if (!isRecording) identifyPlant(blob);
   }, 'image/jpeg', 0.8);
 }
 
@@ -213,6 +214,37 @@ function showCapturedImage(src) {
   document.getElementById('capture-hint').textContent = '촬영 완료!';
   document.getElementById('save-btn').style.display = 'block';
   document.getElementById('save-btn').textContent = isRecording ? '기록 추가' : '등록 완료';
+}
+
+// ===== AI 식물 인식 =====
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function identifyPlant(blob) {
+  const heightBox = document.getElementById('ai-height-box');
+  const heightValue = document.getElementById('ai-height-value');
+  if (!heightBox || !heightValue) return;
+
+  heightBox.style.display = 'flex';
+  heightValue.textContent = '측정 중...';
+
+  try {
+    const base64 = await blobToBase64(blob);
+    const res = await fetch('/api/identify-plant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: base64 })
+    });
+    const data = await res.json();
+    heightValue.textContent = data.height || '측정 불가';
+  } catch (e) {
+    heightValue.textContent = '측정 실패';
+  }
 }
 
 // ===== 저장 (Supabase) =====
@@ -276,6 +308,9 @@ function resetRegisterForm() {
   document.getElementById('capture-btn').style.display = '';
   capturedBlob = null;
   isRecording = false;
+
+  const heightBox = document.getElementById('ai-height-box');
+  if (heightBox) heightBox.style.display = 'none';
 
   const fallback = document.getElementById('upload-fallback-btn');
   if (fallback) fallback.remove();
