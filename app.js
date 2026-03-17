@@ -20,7 +20,7 @@ async function fetchPlants() {
 
 async function uploadPhoto(blob) {
   const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-  const { data, error } = await supabaseClient.storage
+  const { error } = await supabaseClient.storage
     .from('plant-photos')
     .upload(fileName, blob, { contentType: 'image/jpeg' });
   if (error) { console.error(error); return null; }
@@ -257,7 +257,7 @@ async function identifyPlant(blob) {
     });
     const data = await res.json();
     if (!res.ok) {
-      console.error('API 에러 상세:', data);
+      console.error('API 에러 상세:', JSON.stringify(data));
       heightValue.textContent = '측정 실패';
       return;
     }

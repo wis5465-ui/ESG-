@@ -34,9 +34,12 @@ export default async function handler(req, res) {
   }
 
   if (!response.ok) {
-    return res.status(500).json({ error: 'Gemini API error', detail: data });
+    return res.status(500).json({ error: 'Gemini API error', status: response.status, detail: data });
   }
 
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '인식 실패';
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+  if (!text) {
+    return res.status(500).json({ error: 'No text in response', raw: data });
+  }
   res.json({ height: text });
 }
