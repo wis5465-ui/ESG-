@@ -438,12 +438,12 @@ function drawChart(records, carbonByRecord) {
 
   const A = 67.6;
   canvas.width = canvas.offsetWidth * dpr;
-  canvas.height = 220 * dpr;
-  canvas.style.height = '220px';
+  canvas.height = 250 * dpr;
+  canvas.style.height = '250px';
   ctx.scale(dpr, dpr);
 
   const w = canvas.offsetWidth;
-  const h = 220;
+  const h = 250;
 
   ctx.clearRect(0, 0, w, h);
 
@@ -455,7 +455,7 @@ function drawChart(records, carbonByRecord) {
     return;
   }
 
-  const padding = { top: 30, right: 16, bottom: 44, left: 16 };
+  const padding = { top: 30, right: 16, bottom: 60, left: 16 };
   const chartW = w - padding.left - padding.right;
   const chartH = h - padding.top - padding.bottom;
 
