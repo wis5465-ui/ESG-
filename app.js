@@ -438,12 +438,12 @@ function drawChart(records, carbonByRecord) {
 
   const A = 67.6;
   canvas.width = canvas.offsetWidth * dpr;
-  canvas.height = 250 * dpr;
-  canvas.style.height = '250px';
+  canvas.height = 260 * dpr;
+  canvas.style.height = '260px';
   ctx.scale(dpr, dpr);
 
   const w = canvas.offsetWidth;
-  const h = 250;
+  const h = 260;
 
   ctx.clearRect(0, 0, w, h);
 
@@ -455,7 +455,8 @@ function drawChart(records, carbonByRecord) {
     return;
   }
 
-  const padding = { top: 30, right: 16, bottom: 60, left: 16 };
+  const padding = { top: 30, right: 16, bottom: 44, left: 16 };
+  const chartBottomY = padding.top + (h - padding.top - padding.bottom);
   const chartW = w - padding.left - padding.right;
   const chartH = h - padding.top - padding.bottom;
 
@@ -503,12 +504,12 @@ function drawChart(records, carbonByRecord) {
     // 날짜
     ctx.fillStyle = '#6b7280';
     ctx.font = '10px -apple-system, sans-serif';
-    ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x, h - 28);
+    ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x, chartBottomY + 16);
 
     // 기록 순서
     ctx.fillStyle = '#9ca3af';
     ctx.font = '10px -apple-system, sans-serif';
-    ctx.fillText(`${i + 1}번째`, x, h - 14);
+    ctx.fillText(`${i + 1}번째`, x, chartBottomY + 28);
   });
 
   // 범례
