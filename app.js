@@ -416,11 +416,23 @@ async function showRecordView(plantId) {
   document.getElementById('analogy-car').textContent = `커피 한 잔 생산(약 200g)의 ${Math.round(totalG / 200 * 100)}%를 상쇄했어요`;
   document.getElementById('analogy-tree').textContent = `스마트폰 ${Math.round(totalG / 5)}시간 충전에 해당하는 탄소를 줄였어요`;
 
-  drawChart(plant.records);
+  // 각 기록별 누적 탄소 감축량 계산
+  const carbonByRecord = [];
+  let cumB = 0;
+  const heightRecs = plant.records.filter(r => r.height_cm != null);
+  plant.records.forEach((record) => {
+    const idx = heightRecs.indexOf(record);
+    if (idx > 0) {
+      const weekly = 0.0033 * (heightRecs[idx].height_cm ** 2 - heightRecs[idx - 1].height_cm ** 2);
+      if (weekly > 0) cumB += weekly;
+    }
+    carbonByRecord.push(parseFloat((A + cumB).toFixed(1)));
+  });
+  drawChart(plant.records, carbonByRecord);
   showView('view-record');
 }
 
-function drawChart(records) {
+function drawChart(records, carbonByRecord) {
   const canvas = document.getElementById('growth-chart');
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
@@ -442,20 +454,19 @@ function drawChart(records) {
     return;
   }
 
-  const padding = { top: 20, right: 20, bottom: 40, left: 20 };
+  const padding = { top: 24, right: 20, bottom: 40, left: 20 };
   const chartW = w - padding.left - padding.right;
   const chartH = h - padding.top - padding.bottom;
 
-  const heights = records.map((r, i) => r.height_cm || (i + 1));
-  const maxH = Math.max(...heights);
-  const minH = Math.min(...heights);
-  const range = maxH - minH || 1;
+  const values = carbonByRecord || records.map((_, i) => i + 1);
+  const maxV = Math.max(...values);
+  const minV = Math.min(...values);
+  const range = maxV - minV || 1;
 
   const points = records.map((r, i) => {
     const x = padding.left + (i / (records.length - 1)) * chartW;
-    const val = heights[i];
-    const y = padding.top + chartH - ((val - minH) / range) * chartH;
-    return { x, y, date: new Date(r.recorded_at), height: r.height_cm };
+    const y = padding.top + chartH - ((values[i] - minV) / range) * chartH;
+    return { x, y, date: new Date(r.recorded_at), carbon: values[i] };
   });
 
   const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
@@ -490,18 +501,14 @@ function drawChart(records) {
     ctx.stroke();
   });
 
-  ctx.fillStyle = '#9ca3af';
-  ctx.font = '11px -apple-system, sans-serif';
   ctx.textAlign = 'center';
   points.forEach(p => {
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '11px -apple-system, sans-serif';
     ctx.fillText(`${p.date.getMonth() + 1}/${p.date.getDate()}`, p.x, h - 12);
-    if (p.height) {
-      ctx.fillStyle = '#16a34a';
-      ctx.font = 'bold 11px -apple-system, sans-serif';
-      ctx.fillText(`${p.height}cm`, p.x, p.y - 10);
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '11px -apple-system, sans-serif';
-    }
+    ctx.fillStyle = '#16a34a';
+    ctx.font = 'bold 11px -apple-system, sans-serif';
+    ctx.fillText(`${p.carbon}g`, p.x, p.y - 10);
   });
 }
 
