@@ -585,6 +585,14 @@ body {
   margin-bottom: 14px;
 }
 
+.carbon-label-title {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
 .carbon-number {
   font-size: 48px;
   font-weight: 700;
