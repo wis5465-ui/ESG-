@@ -411,7 +411,6 @@ async function showRecordView(plantId) {
   const totalG = A + B;
 
   document.getElementById('carbon-value').textContent = totalG.toFixed(1);
-  document.querySelector('.carbon-unit').textContent = 'g CO₂ 감축';
   // 유추: 커피 한 잔 생산 약 200g CO₂, 스마트폰 1시간 충전 약 5g CO₂
   document.getElementById('analogy-car').textContent = `커피 한 잔 생산(약 200g)의 ${Math.round(totalG / 200 * 100)}%를 상쇄했어요`;
   document.getElementById('analogy-tree').textContent = `스마트폰 ${Math.round(totalG / 5)}시간 충전에 해당하는 탄소를 줄였어요`;
