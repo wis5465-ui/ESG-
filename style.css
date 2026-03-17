@@ -102,10 +102,19 @@ body {
   color: var(--text-primary);
 }
 
+.subtitle-en {
+  font-size: 13px;
+  color: var(--green-400, #4ade80);
+  margin-top: 4px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  opacity: 0.85;
+}
+
 .subtitle {
   font-size: 15px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 2px;
   font-weight: 400;
 }
 
