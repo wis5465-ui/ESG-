@@ -4,6 +4,7 @@ let currentPlantName = null;
 let cameraStream = null;
 let capturedBlob = null;
 let isRecording = false;
+let aiDetectedHeightCm = null;
 
 // ===== Supabase 헬퍼 =====
 async function fetchPlants() {
@@ -199,7 +200,7 @@ function handleCapture() {
   canvas.toBlob((blob) => {
     capturedBlob = blob;
     showCapturedImage(URL.createObjectURL(blob));
-    if (!isRecording) identifyPlant(blob);
+    identifyPlant(blob);
   }, 'image/jpeg', 0.8);
 }
 
@@ -224,7 +225,7 @@ function handleFileUpload(e) {
   const reader = new FileReader();
   reader.onload = (ev) => {
     showCapturedImage(ev.target.result);
-    if (!isRecording) identifyPlant(file);
+    identifyPlant(file);
   };
   reader.readAsDataURL(file);
   e.target.value = '';
@@ -255,13 +256,15 @@ async function identifyPlant(blob) {
       body: JSON.stringify({ imageBase64: base64 })
     });
     const data = await res.json();
-    console.log('API 응답:', JSON.stringify(data));
     if (!res.ok) {
       console.error('API 에러 상세:', data);
       heightValue.textContent = '측정 실패';
       return;
     }
-    heightValue.textContent = data.height || '측정 불가';
+    const heightText = data.height || '측정 불가';
+    heightValue.textContent = heightText;
+    const match = heightText.match(/[\d.]+/);
+    aiDetectedHeightCm = match ? parseFloat(match[0]) : null;
   } catch (e) {
     console.error('identifyPlant error:', e);
     heightValue.textContent = '측정 실패';
@@ -287,11 +290,14 @@ async function savePlant() {
     return;
   }
 
+  const recordData = { photo_url: photoUrl };
+  if (aiDetectedHeightCm !== null) recordData.height_cm = aiDetectedHeightCm;
+
   if (isRecording && currentPlantId) {
     // 기존 식물에 기록 추가
     const { error } = await supabaseClient
       .from('records')
-      .insert({ plant_id: currentPlantId, photo_url: photoUrl });
+      .insert({ plant_id: currentPlantId, ...recordData });
     if (error) { console.error(error); alert('저장 실패'); saveBtn.disabled = false; return; }
   } else {
     // 신규 식물 등록
@@ -304,7 +310,7 @@ async function savePlant() {
 
     const { error: recErr } = await supabaseClient
       .from('records')
-      .insert({ plant_id: newPlant.id, photo_url: photoUrl });
+      .insert({ plant_id: newPlant.id, ...recordData });
     if (recErr) console.error(recErr);
 
     currentPlantId = newPlant.id;
@@ -332,6 +338,7 @@ function resetRegisterForm() {
 
   const heightBox = document.getElementById('ai-height-box');
   if (heightBox) heightBox.style.display = 'none';
+  aiDetectedHeightCm = null;
 
   const fallback = document.getElementById('upload-fallback-btn');
   if (fallback) fallback.remove();
@@ -376,12 +383,14 @@ async function showRecordView(plantId) {
   plant.records.forEach((record, i) => {
     const item = document.createElement('div');
     item.className = 'timeline-item';
+    const heightStr = record.height_cm ? `<div class="timeline-height">📏 ${record.height_cm}cm</div>` : '';
     item.innerHTML = `
       <div class="timeline-dot"></div>
       <img class="timeline-thumb" src="${record.photo_url}" alt="기록 ${i + 1}">
       <div class="timeline-info">
         <div class="timeline-date">${new Date(record.recorded_at).toLocaleDateString('ko-KR')}</div>
         <div class="timeline-label">${i === 0 ? '첫 번째 기록' : `${i + 1}번째 기록`}</div>
+        ${heightStr}
       </div>
     `;
     timeline.appendChild(item);
@@ -427,11 +436,16 @@ function drawChart(records) {
   const chartW = w - padding.left - padding.right;
   const chartH = h - padding.top - padding.bottom;
 
+  const heights = records.map((r, i) => r.height_cm || (i + 1));
+  const maxH = Math.max(...heights);
+  const minH = Math.min(...heights);
+  const range = maxH - minH || 1;
+
   const points = records.map((r, i) => {
     const x = padding.left + (i / (records.length - 1)) * chartW;
-    const growthIndex = ((i + 1) / records.length) * 100;
-    const y = padding.top + chartH - (growthIndex / 100) * chartH;
-    return { x, y, date: new Date(r.recorded_at) };
+    const val = heights[i];
+    const y = padding.top + chartH - ((val - minH) / range) * chartH;
+    return { x, y, date: new Date(r.recorded_at), height: r.height_cm };
   });
 
   const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
@@ -471,6 +485,13 @@ function drawChart(records) {
   ctx.textAlign = 'center';
   points.forEach(p => {
     ctx.fillText(`${p.date.getMonth() + 1}/${p.date.getDate()}`, p.x, h - 12);
+    if (p.height) {
+      ctx.fillStyle = '#16a34a';
+      ctx.font = 'bold 11px -apple-system, sans-serif';
+      ctx.fillText(`${p.height}cm`, p.x, p.y - 10);
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '11px -apple-system, sans-serif';
+    }
   });
 }
 

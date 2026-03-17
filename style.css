@@ -1,5 +1,12 @@
 /* ===== Apple-style Plant Management App ===== */
 
+.timeline-height {
+  font-size: 13px;
+  font-weight: 600;
+  color: #16a34a;
+  margin-top: 2px;
+}
+
 :root {
   --green-50: #f0fdf4;
   --green-100: #dcfce7;
