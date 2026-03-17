@@ -428,8 +428,8 @@ async function showRecordView(plantId) {
     }
     carbonByRecord.push(parseFloat((A + cumB).toFixed(1)));
   });
-  drawChart(plant.records, carbonByRecord);
   showView('view-record');
+  requestAnimationFrame(() => drawChart(plant.records, carbonByRecord));
 }
 
 function drawChart(records, carbonByRecord) {
@@ -477,18 +477,14 @@ function drawChart(records, carbonByRecord) {
     const aBarH = (A / maxV) * chartH;
     const aY = padding.top + chartH - aBarH;
     ctx.fillStyle = '#16a34a';
-    ctx.beginPath();
-    ctx.roundRect(x - barW / 2, aY, barW, aBarH, [4, 4, 0, 0]);
-    ctx.fill();
+    ctx.fillRect(x - barW / 2, aY, barW, aBarH);
 
     // B 부분 (연한 초록) — A 위에 쌓기
     if (bPart > 0) {
       const bBarH = (bPart / maxV) * chartH;
       const bY = aY - bBarH;
       ctx.fillStyle = '#86efac';
-      ctx.beginPath();
-      ctx.roundRect(x - barW / 2, bY, barW, bBarH, [4, 4, 0, 0]);
-      ctx.fill();
+      ctx.fillRect(x - barW / 2, bY, barW, bBarH);
 
       // B 숫자
       ctx.fillStyle = '#15803d';
