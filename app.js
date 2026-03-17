@@ -437,79 +437,98 @@ function drawChart(records, carbonByRecord) {
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
 
+  const A = 67.6;
   canvas.width = canvas.offsetWidth * dpr;
-  canvas.height = 200 * dpr;
+  canvas.height = 220 * dpr;
+  canvas.style.height = '220px';
   ctx.scale(dpr, dpr);
 
   const w = canvas.offsetWidth;
-  const h = 200;
+  const h = 220;
 
   ctx.clearRect(0, 0, w, h);
 
-  if (records.length < 2) {
+  if (records.length < 1) {
     ctx.fillStyle = '#9ca3af';
     ctx.font = '14px -apple-system, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('기록이 2개 이상이면 그래프가 표시됩니다', w / 2, h / 2);
+    ctx.fillText('기록이 없습니다', w / 2, h / 2);
     return;
   }
 
-  const padding = { top: 24, right: 20, bottom: 40, left: 20 };
+  const padding = { top: 30, right: 16, bottom: 44, left: 16 };
   const chartW = w - padding.left - padding.right;
   const chartH = h - padding.top - padding.bottom;
 
-  const values = carbonByRecord || records.map((_, i) => i + 1);
-  const maxV = Math.max(...values);
-  const minV = Math.min(...values);
-  const range = maxV - minV || 1;
+  const values = carbonByRecord || records.map(() => A);
+  const maxV = Math.max(...values, A + 1);
 
-  const points = records.map((r, i) => {
-    const x = padding.left + (i / (records.length - 1)) * chartW;
-    const y = padding.top + chartH - ((values[i] - minV) / range) * chartH;
-    return { x, y, date: new Date(r.recorded_at), carbon: values[i] };
-  });
+  const n = records.length;
+  const barW = Math.min(48, (chartW / n) * 0.6);
+  const gap = chartW / n;
 
-  const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
-  gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
-  gradient.addColorStop(1, 'rgba(34, 197, 94, 0.02)');
+  records.forEach((r, i) => {
+    const total = values[i];
+    const bPart = Math.max(0, total - A);
+    const x = padding.left + gap * i + gap / 2;
+    const date = new Date(r.recorded_at);
 
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, h - padding.bottom);
-  points.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(points[points.length - 1].x, h - padding.bottom);
-  ctx.closePath();
-  ctx.fillStyle = gradient;
-  ctx.fill();
-
-  ctx.beginPath();
-  points.forEach((p, i) => {
-    if (i === 0) ctx.moveTo(p.x, p.y);
-    else ctx.lineTo(p.x, p.y);
-  });
-  ctx.strokeStyle = '#22c55e';
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-
-  points.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-  });
-
-  ctx.textAlign = 'center';
-  points.forEach(p => {
-    ctx.fillStyle = '#9ca3af';
-    ctx.font = '11px -apple-system, sans-serif';
-    ctx.fillText(`${p.date.getMonth() + 1}/${p.date.getDate()}`, p.x, h - 12);
+    // A 부분 (진한 초록)
+    const aBarH = (A / maxV) * chartH;
+    const aY = padding.top + chartH - aBarH;
     ctx.fillStyle = '#16a34a';
+    ctx.beginPath();
+    ctx.roundRect(x - barW / 2, aY, barW, aBarH, [4, 4, 0, 0]);
+    ctx.fill();
+
+    // B 부분 (연한 초록) — A 위에 쌓기
+    if (bPart > 0) {
+      const bBarH = (bPart / maxV) * chartH;
+      const bY = aY - bBarH;
+      ctx.fillStyle = '#86efac';
+      ctx.beginPath();
+      ctx.roundRect(x - barW / 2, bY, barW, bBarH, [4, 4, 0, 0]);
+      ctx.fill();
+
+      // B 숫자
+      ctx.fillStyle = '#15803d';
+      ctx.font = 'bold 10px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`+${bPart.toFixed(1)}g`, x, bY - 4);
+    }
+
+    // 합계 숫자
+    const totalBarH = (total / maxV) * chartH;
+    const totalY = padding.top + chartH - totalBarH;
+    ctx.fillStyle = '#14532d';
     ctx.font = 'bold 11px -apple-system, sans-serif';
-    ctx.fillText(`${p.carbon}g`, p.x, p.y - 10);
+    ctx.textAlign = 'center';
+    ctx.fillText(`${total.toFixed(1)}g`, x, totalY - (bPart > 0 ? 18 : 4));
+
+    // 날짜
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x, h - 28);
+
+    // 기록 순서
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.fillText(`${i + 1}번째`, x, h - 14);
   });
+
+  // 범례
+  const legendY = h - 4;
+  ctx.fillStyle = '#16a34a';
+  ctx.fillRect(w / 2 - 70, legendY - 8, 10, 8);
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '9px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('커피박 67.6g', w / 2 - 57, legendY - 1);
+
+  ctx.fillStyle = '#86efac';
+  ctx.fillRect(w / 2 + 10, legendY - 8, 10, 8);
+  ctx.fillStyle = '#6b7280';
+  ctx.fillText('바질 누적 흡수량', w / 2 + 23, legendY - 1);
 }
 
 // ===== 초기화 =====
