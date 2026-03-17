@@ -397,14 +397,24 @@ async function showRecordView(plantId) {
   });
 
   // 탄소 감축 계산
-  const firstDate = new Date(plant.records[0].recorded_at);
-  const now = new Date();
-  const months = Math.max(0.1, (now - firstDate) / (1000 * 60 * 60 * 24 * 30));
-  const carbonKg = (months * 0.5).toFixed(1);
+  // A: 커피박 업사이클 고정값
+  const A = 67.6;
+  // B: 기록들 중 height_cm 있는 것만 순서대로 추출해 누적 흡수량 계산
+  const heightRecords = plant.records.filter(r => r.height_cm != null);
+  let B = 0;
+  for (let i = 1; i < heightRecords.length; i++) {
+    const hCurr = heightRecords[i].height_cm;
+    const hPrev = heightRecords[i - 1].height_cm;
+    const weekly = 0.0033 * (hCurr * hCurr - hPrev * hPrev);
+    if (weekly > 0) B += weekly;
+  }
+  const totalG = A + B;
 
-  document.getElementById('carbon-value').textContent = carbonKg;
-  document.getElementById('analogy-car').textContent = `자동차 ${(carbonKg * 4.6).toFixed(1)}km 주행과 같아요`;
-  document.getElementById('analogy-tree').textContent = `나무 ${Math.max(1, Math.round(carbonKg / 22))}그루를 심은 효과예요`;
+  document.getElementById('carbon-value').textContent = totalG.toFixed(1);
+  document.querySelector('.carbon-unit').textContent = 'g CO₂ 감축';
+  // 유추: 커피 한 잔 생산 약 200g CO₂, 스마트폰 1시간 충전 약 5g CO₂
+  document.getElementById('analogy-car').textContent = `커피 한 잔 생산(약 200g)의 ${Math.round(totalG / 200 * 100)}%를 상쇄했어요`;
+  document.getElementById('analogy-tree').textContent = `스마트폰 ${Math.round(totalG / 5)}시간 충전에 해당하는 탄소를 줄였어요`;
 
   drawChart(plant.records);
   showView('view-record');
