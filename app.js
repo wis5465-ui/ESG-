@@ -527,6 +527,29 @@ function drawChart(records, carbonByRecord) {
   ctx.fillText('바질 누적 흡수량', w / 2 + 23, legendY - 1);
 }
 
+// ===== 환경 교육 팝업 =====
+const CHAPTER_URLS = {
+  1: 'https://www.youtube.com/watch?v=YOUR_VIDEO_ID_HERE', // Chapter 1 영상 URL로 교체
+  2: null,
+  3: null,
+  4: null,
+};
+
+function openEduPopup() {
+  document.getElementById('edu-popup-overlay').classList.add('active');
+}
+
+function closeEduPopup() {
+  document.getElementById('edu-popup-overlay').classList.remove('active');
+}
+
+function openChapter(num) {
+  const url = CHAPTER_URLS[num];
+  if (!url) return;
+  closeEduPopup();
+  window.open(url, '_blank');
+}
+
 // ===== 초기화 =====
 document.addEventListener('DOMContentLoaded', () => {
   renderPlants();

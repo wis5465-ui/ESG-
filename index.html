@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <button class="edu-button" onclick="alert('교육 콘텐츠 페이지로 이동합니다.')">
+    <button class="edu-button" onclick="openEduPopup()">
       <div class="edu-button-inner">
         <span class="edu-icon">📚</span>
         <div class="edu-text">
@@ -141,6 +141,51 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 팝업: 환경 교육 챕터 선택 -->
+<div id="edu-popup-overlay" class="popup-overlay" onclick="closeEduPopup()">
+  <div class="popup-sheet" onclick="event.stopPropagation()">
+    <div class="popup-handle"></div>
+    <h3>환경 교육 시청하기</h3>
+    <p class="popup-subtitle">커피박 화분과 식물의 이야기</p>
+
+    <button class="edu-chapter-item" onclick="openChapter(1)">
+      <div class="chapter-badge">Ch 1</div>
+      <div class="chapter-info">
+        <span class="chapter-title">커피박이란 무엇인가요?</span>
+        <span class="chapter-desc">커피 찌꺼기의 재탄생 이야기</span>
+      </div>
+      <span class="popup-arrow">›</span>
+    </button>
+
+    <button class="edu-chapter-item locked" onclick="openChapter(2)">
+      <div class="chapter-badge ch2">Ch 2</div>
+      <div class="chapter-info">
+        <span class="chapter-title">식물이 탄소를 흡수하는 방법</span>
+        <span class="chapter-desc">광합성과 탄소 순환의 비밀</span>
+      </div>
+      <span class="popup-arrow">›</span>
+    </button>
+
+    <button class="edu-chapter-item locked" onclick="openChapter(3)">
+      <div class="chapter-badge ch3">Ch 3</div>
+      <div class="chapter-info">
+        <span class="chapter-title">우리가 만드는 탄소 제로</span>
+        <span class="chapter-desc">작은 실천이 만드는 큰 변화</span>
+      </div>
+      <span class="popup-arrow">›</span>
+    </button>
+
+    <button class="edu-chapter-item locked" onclick="openChapter(4)">
+      <div class="chapter-badge ch4">Ch 4</div>
+      <div class="chapter-info">
+        <span class="chapter-title">지속가능한 미래를 위해</span>
+        <span class="chapter-desc">ESG와 나의 역할</span>
+      </div>
+      <span class="popup-arrow">›</span>
+    </button>
   </div>
 </div>
 

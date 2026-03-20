@@ -747,6 +747,89 @@ body {
   color: var(--text-tertiary);
 }
 
+/* ===== Education Popup ===== */
+.popup-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: -12px;
+  margin-bottom: 20px;
+}
+
+.edu-chapter-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--green-50);
+  border: 1px solid var(--green-100);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.edu-chapter-item:active {
+  background: var(--green-100);
+  transform: scale(0.98);
+}
+
+.edu-chapter-item.locked {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.edu-chapter-item.locked:active {
+  transform: none;
+  background: var(--green-50);
+}
+
+.chapter-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--green-500), var(--green-700));
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.chapter-badge.ch2 {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.chapter-badge.ch3 {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.chapter-badge.ch4 {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.chapter-info {
+  flex: 1;
+}
+
+.chapter-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chapter-desc {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
 /* ===== Utility ===== */
 @media (prefers-color-scheme: dark) {
   :root {
