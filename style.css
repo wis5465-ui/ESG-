@@ -747,6 +747,84 @@ body {
   color: var(--text-tertiary);
 }
 
+/* ===== New Chapter Banner ===== */
+.new-chapter-banner {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  background: linear-gradient(135deg, #14532d, #15803d);
+  z-index: 200;
+  animation: bannerSlideDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+@keyframes bannerSlideDown {
+  from { transform: translateX(-50%) translateY(-100%); }
+  to { transform: translateX(-50%) translateY(0); }
+}
+
+.banner-inner {
+  padding: 16px 20px 14px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+}
+
+.banner-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.banner-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.banner-btn-primary {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  color: var(--green-700);
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.banner-btn-primary:active {
+  transform: scale(0.97);
+  background: var(--green-50);
+}
+
+.banner-btn-secondary {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.banner-btn-secondary:active {
+  transform: scale(0.97);
+  background: rgba(255,255,255,0.25);
+}
+
+/* 배너 표시 시 메인 뷰 상단 여백 확보 */
+.banner-visible .view-inner {
+  padding-top: 120px;
+}
+
 /* ===== Education Popup ===== */
 .popup-subtitle {
   font-size: 13px;

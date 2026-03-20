@@ -535,6 +535,42 @@ const CHAPTER_URLS = {
   4: null,
 };
 
+// 공개된 챕터 목록 — 새 챕터 오픈 시 번호 추가 (예: [1], [1,2])
+const CHAPTERS_RELEASED = [];
+
+// ===== 새 챕터 배너 =====
+function checkNewChapterBanner() {
+  if (CHAPTERS_RELEASED.length === 0) return;
+  const seen = JSON.parse(localStorage.getItem('esg_seen_chapters') || '[]');
+  const hasNew = CHAPTERS_RELEASED.some(ch => !seen.includes(ch));
+  if (hasNew) {
+    document.getElementById('new-chapter-banner').style.display = 'block';
+    document.getElementById('view-main').classList.add('banner-visible');
+  }
+}
+
+function markChaptersSeen() {
+  const seen = JSON.parse(localStorage.getItem('esg_seen_chapters') || '[]');
+  CHAPTERS_RELEASED.forEach(ch => { if (!seen.includes(ch)) seen.push(ch); });
+  localStorage.setItem('esg_seen_chapters', JSON.stringify(seen));
+}
+
+function hideBanner() {
+  document.getElementById('new-chapter-banner').style.display = 'none';
+  document.getElementById('view-main').classList.remove('banner-visible');
+}
+
+function bannerOpenEdu() {
+  markChaptersSeen();
+  hideBanner();
+  openEduPopup();
+}
+
+function bannerDismiss() {
+  markChaptersSeen();
+  hideBanner();
+}
+
 function openEduPopup() {
   document.getElementById('edu-popup-overlay').classList.add('active');
 }
@@ -553,4 +589,5 @@ function openChapter(num) {
 // ===== 초기화 =====
 document.addEventListener('DOMContentLoaded', () => {
   renderPlants();
+  checkNewChapterBanner();
 });

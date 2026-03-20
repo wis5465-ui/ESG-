@@ -10,6 +10,17 @@
 </head>
 <body>
 
+<!-- 새 챕터 알림 배너 -->
+<div id="new-chapter-banner" class="new-chapter-banner" style="display:none">
+  <div class="banner-inner">
+    <p class="banner-text">🎬 새 교육이 열렸어요! 먼저 보고 기록할까요?</p>
+    <div class="banner-buttons">
+      <button class="banner-btn-primary" onclick="bannerOpenEdu()">교육 보기</button>
+      <button class="banner-btn-secondary" onclick="bannerDismiss()">기록 먼저</button>
+    </div>
+  </div>
+</div>
+
 <!-- 뷰 1: 내 식물 관리 (메인) -->
 <div id="view-main" class="view active">
   <div class="view-inner">
