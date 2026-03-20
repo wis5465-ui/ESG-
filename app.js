@@ -529,7 +529,7 @@ function drawChart(records, carbonByRecord) {
 
 // ===== 환경 교육 팝업 =====
 const CHAPTER_URLS = {
-  1: 'https://www.youtube.com/watch?v=YOUR_VIDEO_ID_HERE', // Chapter 1 영상 URL로 교체
+  1: null, // TODO: 실제 영상 URL로 교체
   2: null,
   3: null,
   4: null,
