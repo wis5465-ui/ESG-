@@ -535,44 +535,66 @@ const CHAPTER_URLS = {
   4: null,
 };
 
-// 공개된 챕터 목록 — 새 챕터 오픈 시 번호 추가 (예: [1], [1,2])
-const CHAPTERS_RELEASED = [];
+const CHAPTERS = [
+  { num: 1, title: '커피박이란 무엇인가요?', desc: '커피 찌꺼기의 재탄생 이야기', badgeClass: '' },
+  { num: 2, title: '식물이 탄소를 흡수하는 방법', desc: '광합성과 탄소 순환의 비밀', badgeClass: 'ch2' },
+  { num: 3, title: '우리가 만드는 탄소 제로', desc: '작은 실천이 만드는 큰 변화', badgeClass: 'ch3' },
+  { num: 4, title: '지속가능한 미래를 위해', desc: 'ESG와 나의 역할', badgeClass: 'ch4' },
+];
 
-// ===== 새 챕터 배너 =====
-function checkNewChapterBanner() {
-  if (CHAPTERS_RELEASED.length === 0) return;
-  const seen = JSON.parse(localStorage.getItem('esg_seen_chapters') || '[]');
-  const hasNew = CHAPTERS_RELEASED.some(ch => !seen.includes(ch));
-  if (hasNew) {
-    document.getElementById('new-chapter-banner').style.display = 'block';
-    document.getElementById('view-main').classList.add('banner-visible');
-  }
+const LOCK_REASONS = {
+  2: 'Ch.1 시청 후, 2번째 기록 시 열려요',
+  3: 'Ch.2 시청 후, 3번째 기록 시 열려요',
+  4: 'Ch.3 시청 후, 4번째 기록 시 열려요',
+};
+
+async function getTotalRecordCount() {
+  const { count, error } = await supabaseClient
+    .from('records')
+    .select('*', { count: 'exact', head: true });
+  return error ? 0 : (count || 0);
 }
 
-function markChaptersSeen() {
-  const seen = JSON.parse(localStorage.getItem('esg_seen_chapters') || '[]');
-  CHAPTERS_RELEASED.forEach(ch => { if (!seen.includes(ch)) seen.push(ch); });
-  localStorage.setItem('esg_seen_chapters', JSON.stringify(seen));
+function getSeenChapters() {
+  return JSON.parse(localStorage.getItem('esg_seen_chapters') || '[]');
 }
 
-function hideBanner() {
-  document.getElementById('new-chapter-banner').style.display = 'none';
-  document.getElementById('view-main').classList.remove('banner-visible');
+function computeUnlocked(recordCount, seenChapters) {
+  if (recordCount >= 4) return [1, 2, 3, 4];
+  const unlocked = [1];
+  if (recordCount >= 2 && seenChapters.includes(1)) unlocked.push(2);
+  if (recordCount >= 3 && seenChapters.includes(2)) unlocked.push(3);
+  return unlocked;
 }
 
-function bannerOpenEdu() {
-  markChaptersSeen();
-  hideBanner();
-  openEduPopup();
+function renderEduChapters(unlockedChapters) {
+  const container = document.getElementById('edu-chapters-list');
+  container.innerHTML = '';
+
+  CHAPTERS.forEach(ch => {
+    const isUnlocked = unlockedChapters.includes(ch.num);
+    const btn = document.createElement('button');
+    btn.className = 'edu-chapter-item' + (isUnlocked ? '' : ' locked');
+    btn.onclick = () => { if (isUnlocked) openChapter(ch.num); };
+    btn.innerHTML = `
+      <div class="chapter-badge ${ch.badgeClass}">Ch ${ch.num}</div>
+      <div class="chapter-info">
+        <span class="chapter-title">${ch.title}</span>
+        <span class="chapter-desc">${isUnlocked ? ch.desc : LOCK_REASONS[ch.num]}</span>
+      </div>
+      ${isUnlocked ? '<span class="popup-arrow">›</span>' : '<span class="chapter-lock-icon">🔒</span>'}
+    `;
+    container.appendChild(btn);
+  });
 }
 
-function bannerDismiss() {
-  markChaptersSeen();
-  hideBanner();
-}
-
-function openEduPopup() {
+async function openEduPopup() {
   document.getElementById('edu-popup-overlay').classList.add('active');
+  const [recordCount, seenChapters] = await Promise.all([
+    getTotalRecordCount(),
+    Promise.resolve(getSeenChapters()),
+  ]);
+  renderEduChapters(computeUnlocked(recordCount, seenChapters));
 }
 
 function closeEduPopup() {
@@ -580,10 +602,53 @@ function closeEduPopup() {
 }
 
 function openChapter(num) {
+  // 시청 기록 저장
+  const seen = getSeenChapters();
+  if (!seen.includes(num)) {
+    seen.push(num);
+    localStorage.setItem('esg_seen_chapters', JSON.stringify(seen));
+  }
   const url = CHAPTER_URLS[num];
   if (!url) return;
   closeEduPopup();
   window.open(url, '_blank');
+}
+
+// ===== 새 챕터 배너 =====
+async function checkNewChapterBanner() {
+  const recordCount = await getTotalRecordCount();
+  const seenChapters = getSeenChapters();
+  const unlocked = computeUnlocked(recordCount, seenChapters);
+  const notified = JSON.parse(localStorage.getItem('esg_notified_chapters') || '[]');
+  const hasNew = unlocked.some(ch => !notified.includes(ch));
+  if (hasNew) {
+    document.getElementById('new-chapter-banner').style.display = 'block';
+    document.getElementById('view-main').classList.add('banner-visible');
+  }
+}
+
+function hideBanner() {
+  document.getElementById('new-chapter-banner').style.display = 'none';
+  document.getElementById('view-main').classList.remove('banner-visible');
+}
+
+async function markBannerNotified() {
+  const recordCount = await getTotalRecordCount();
+  const unlocked = computeUnlocked(recordCount, getSeenChapters());
+  const notified = JSON.parse(localStorage.getItem('esg_notified_chapters') || '[]');
+  unlocked.forEach(ch => { if (!notified.includes(ch)) notified.push(ch); });
+  localStorage.setItem('esg_notified_chapters', JSON.stringify(notified));
+}
+
+function bannerOpenEdu() {
+  markBannerNotified();
+  hideBanner();
+  openEduPopup();
+}
+
+function bannerDismiss() {
+  markBannerNotified();
+  hideBanner();
 }
 
 // ===== 초기화 =====

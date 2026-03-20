@@ -747,6 +747,12 @@ body {
   color: var(--text-tertiary);
 }
 
+.chapter-lock-icon {
+  font-size: 18px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
 /* ===== New Chapter Banner ===== */
 .new-chapter-banner {
   position: fixed;
